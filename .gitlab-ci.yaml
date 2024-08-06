@@ -1,0 +1,6 @@
+stages:
+  - sonarqube
+  - quality_gate
+  - trivy_fsscan
+  - userdata
+  - terraform 
