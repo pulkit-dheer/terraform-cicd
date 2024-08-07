@@ -26,10 +26,15 @@ sonarqube-check:
   only:
     - main
 
-
 trivy_fs_scan:
-    stage: trivy_fsscan
-    script:
+  stage: trivy_fsscan
+  script:
+    - apt-get update
+    - apt-get install wget apt-transport-https gnupg lsb-release -y 
+    - wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | apt-key add -
+    - echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | tee -a /etc/apt/sources.list.d/trivy.list
+    - apt-get update
+    - apt-get install trivy
     - trivy fs . > trivyfs.txt
 
 executable_permission:
@@ -38,22 +43,34 @@ executable_permission:
   - chmod +x user-data.sh
 
 terraform_init:
-  stage: terraform
+  stage: terraform_init
   script:
-  - terraform init
-
-terraform_plan:
-  stage: terraform
-  script:
-  - terraform plan
-
+    - apt-get update && apt-get install -y gnupg software-properties-common
+    - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
+    - echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+    - apt-get update
+    - apt-get install terraform 
+    - terraform version
+    - terraform init
+    - terraform plan
+  variables:
+    AWS_ACCESS_KEY_ID: $aws_access_key_id
+    AWS_SECRET_ACCESS_KEY: $aws_secret_access_key
 
 terraform_apply:
-  stage: terraform
+  stage: terraform_apply  
   script:
-  - terraform apply --auto-approve
+    - apt-get update && apt-get install -y gnupg software-properties-common
+    - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
+    - echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+    - apt-get update
+    - apt-get install terraform 
+    - terraform init
+    - terraform apply --auto-approve
   when: manual
-
+  variables:
+    AWS_ACCESS_KEY_ID: $aws_access_key_id
+    AWS_SECRET_ACCESS_KEY: $aws_secret_access_key
 
 
 
