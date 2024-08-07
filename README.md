@@ -1,2 +1,2 @@
 # terraform-cicd
-This is the terrafrom cicd project build to deploy Zomate website on the AWS ec2 instance
+This is the Terraform CI/CD project build to deploy the Zomato website on the AWS ec2 instance
